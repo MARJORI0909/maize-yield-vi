@@ -1,0 +1,38 @@
+# for ALL: eliminate NA,  "safe" correlation calculation 
+# for CORRELATIONS: min 3 observations
+safe_cor <- function(x, y) {
+  ok <- complete.cases(x, y)
+  if (sum(ok) < 3) return(NA_real_)
+  cor(x[ok], y[ok], method = "pearson")
+}
+
+# for RMSE: two observation-prediction pairs --> error will have statistical meaning.
+safe_rmse <- function(obs, pred) {
+  ok <- complete.cases(obs, pred)
+  if (sum(ok) < 2) return(NA_real_)
+  Metrics::rmse(obs[ok], pred[ok])
+}
+
+# for MAE: two observation-prediction pairs
+safe_mae <- function(obs, pred) {
+  ok <- complete.cases(obs, pred)
+  if (sum(ok) < 2) return(NA_real_)
+  Metrics::mae(obs[ok], pred[ok])
+}
+
+# for r2: two observation-prediction pairs. SSE (squared error), SST(total variability)
+safe_r2_pred <- function(obs, pred) {
+  ok <- complete.cases(obs, pred)
+  if (sum(ok) < 2) return(NA_real_)
+  sse <- sum((obs[ok] - pred[ok])^2)
+  sst <- sum((obs[ok] - mean(obs[ok]))^2)
+  if (sst == 0) return(NA_real_)
+  1 - sse/sst
+}
+
+#dynamic formula for model 
+make_formula <- function(response, predictors) {
+  as.formula(
+    paste(response, "~", paste(predictors, collapse = " + "))
+  )
+}
