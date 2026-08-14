@@ -1,9 +1,6 @@
 #data clean
 data <- data_raw %>%
-  clean_names() %>%  #standardize names
-  rename(
-    irrigation = irrigation
-  ) %>%
+  clean_names() %>%  
   mutate(
     plot = as.factor(plot),
     point = as.factor(point),
