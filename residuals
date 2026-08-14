@@ -1,0 +1,21 @@
+###Residual diagnostics for the best results
+#------------------------------------------
+
+#only with data training 
+
+par(mfrow = c(2,2),family = "Times New Roman",
+  cex = 1,        # general
+  cex.lab = 1,    # axis label
+  cex.axis = 0.8,   # number axis label
+  cex.main = 1    ) #title
+plot(best_result$fit) 
+
+
+#Normality
+
+shapiro.test(residuals(best_result$fit))
+
+# heteroscedasticity
+library(lmtest)
+
+bptest(best_result$fit)
