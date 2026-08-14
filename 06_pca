@@ -1,9 +1,7 @@
 #PCA explorative (all DAS)  variables: VI+ seed rate
 
-common_das: 
-
-#das 
-d <- 
+#d: day after sowing. example: 50
+d <- 50
   
 pca_vars <- c("evi", "gndvi", "ndmi", "ndvi", "osavi", "ndre_b05", "ndre_b06", "seed_rate","yiel_dmean")
 
@@ -15,7 +13,6 @@ pca_data <- train %>%
 valid_vars <- names(pca_data)[sapply(pca_data, function(x) sd(x, na.rm = TRUE) > 0)]
   pca_data <- pca_data %>% select(all_of(valid_vars))
 
-  
 pca_res <- PCA(pca_data, scale.unit = TRUE, graph = FALSE)
 
 rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "seed_rate"] <- "Seed rate"
@@ -56,7 +53,7 @@ p <- fviz_pca_biplot(
     )
   )
     
-# Cambiar la fuente de las etiquetas de las flechas
+# Change the font of the arrow labels
 
 for(i in seq_along(p$layers)) {
   if("family" %in% names(p$layers[[i]]$aes_params) || 
@@ -75,9 +72,9 @@ p
 
 
 #PCA explorative (only VIs) 
-#date
-d <- 
-
+#d: day after sowing. example: 50
+d <- 50
+  
 pca_db <- train %>%
   filter(days_after_sowing == d) %>%
   select(all_of(vi_vars)) %>%
@@ -89,5 +86,5 @@ pca_db <- pca_db %>% select(all_of(valid_vars))
 pca_res1 <- PCA(pca_db, scale.unit = TRUE, graph = FALSE)
 
 fviz_pca_var(pca_res1, repel = TRUE)+
-    ggtitle("")
+    ggtitle("PCA - VIs 50 DAS")
     
