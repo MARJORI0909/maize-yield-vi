@@ -6,7 +6,7 @@ safe_cor <- function(x, y) {
   cor(x[ok], y[ok], method = "pearson")
 }
 
-# for RMSE: two observation-prediction pairs --> error will have statistical meaning.
+# for RMSE: two observation-prediction pairs 
 safe_rmse <- function(obs, pred) {
   ok <- complete.cases(obs, pred)
   if (sum(ok) < 2) return(NA_real_)
