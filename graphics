@@ -1,0 +1,124 @@
+
+
+
+#6.1 Format
+# ---------------------------------
+long_data <- train %>%
+  pivot_longer(         #many columns in one column
+    cols = all_of(vi_vars),
+    names_to = "vi",
+    values_to = "value"
+  )
+  
+install.packages("ggplot2")
+library(ggplot2)
+  
+
+# 6.2 DAS BOXPLOT
+# ---------------------------------
+
+#only 116: TRAIN PLOT. Simple graphic
+p_box <- ggplot(long_data, aes(x = factor(days_after_sowing), y = value)) +
+  geom_boxplot(alpha = 0.75, outlier.shape = 16, outlier.size = 1.5) +
+  facet_wrap(~ vi, scales = "free_y", ncol = 2) +
+  theme_bw(base_size = 11) +
+  labs(
+    title = "Distribution of vegetative indices by DAS",
+    x = "Days after sowing (DAS)",
+    y = "Index value"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+p_box
+
+# Grafic (boxplot + points)
+ggplot(long_data, aes(x = factor(days_after_sowing), y = value)) +
+  geom_boxplot(fill = "#7CAE00", alpha = 0.75, outlier.shape = NA) +
+  geom_jitter(width = 0.15, size = 0.4, color = "brown", alpha = 0.8) +
+  facet_wrap(~ vi, scales = "free_y", ncol=2, 
+  labeller = labeller(vi = c(
+  evi = "EVI",
+  gndvi = "GNDVI",
+  ndmi = "NDMI",
+  ndre_b05 = "NDRE B05",
+  ndre_b06 = "NDRE B06",
+  ndvi = "NDVI",
+  osavi = "OSAVI"
+))) +
+  labs(
+    x = "Days after sowing",
+    y = "Index value"
+  ) +
+  theme_bw(base_size = 11) +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold", size = 10,family = "Times New Roman"),
+    axis.text = element_text(size = 8, color= "black",family = "Times New Roman"),
+    axis.title = element_text(size = 12,family = "Times New Roman"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+#to separate in panels (different indices)
+
+data_subset <- long_data %>%
+  filter(vi %in% c("ndvi", "gndvi", "evi"))
+
+ggplot(data_subset, aes(x = factor(days_after_sowing), y = value)) +
+  geom_boxplot(fill = "#7CAE00", alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(width = 0.15, size = 1.2, color = "orange") +
+  facet_wrap(~ vi, nrow = 1) +
+  theme_classic()
+
+
+# 6.3 Average time curves (linear)
+# ---------------------------------
+#summarize the date in groups:mean, sd (standard deviation - measure dispersion), n (sample size), se (standard error - uncertainty the mean have)
+
+summary_vi <- long_data %>%
+  group_by(plot, days_after_sowing, vi) %>%
+  summarise(
+    mean_value = mean(value, na.rm = TRUE),
+    sd_value   = sd(value, na.rm = TRUE),
+    n = sum(!is.na(value)),
+    se_value = sd_value / sqrt(n),
+    .groups = "drop"   
+  )
+
+summary_vi
+#drop: remove group, normalkeeps data frame
+
+p_time <- ggplot(summary_vi, aes(x = days_after_sowing, y = mean_value)) +
+  geom_line(linewidth = 0.75,color = "black") +
+  geom_point(size = 1, color = "navy") +
+  geom_errorbar(aes(ymin = mean_value - se_value, ymax = mean_value + se_value), width = 4,color = "brown") +
+  facet_wrap(~ vi, scales = "free_y", ncol = 2,
+  labeller = labeller(vi = c(
+  evi = "EVI",
+  gndvi = "GNDVI",
+  ndmi = "NDMI",
+  ndre_b05 = "NDRE B05",
+  ndre_b06 = "NDRE B06",
+  ndvi = "NDVI",
+  osavi = "OSAVI"
+))) + 
+  scale_x_continuous(breaks = unique(summary_vi$days_after_sowing)) +
+  theme_bw(base_size = 11) +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA),
+    strip.background = element_blank(),
+    strip.text = element_text(face = "bold", size = 10
+    ,family = "Times New Roman"),
+    axis.text = element_text(size = 8, color= "black",family = "Times New Roman"),
+    axis.title = element_text(size = 12,family = "Times New Roman"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()) +
+  labs(
+    title = "",
+    x = "Days after sowing",
+    y = "Mean ± standard error"
+  )
+
+p_time
+  
