@@ -65,6 +65,7 @@ ggplot(data_subset, aes(x = factor(days_after_sowing), y = value)) +
 
 # Average time curves (linear)
 #summarize the date in groups:mean, sd (standard deviation), n (sample size), se (standard error)
+#drop: remove group, normalkeeps data frame
 
 summary_vi <- long_data %>%
   group_by(plot, days_after_sowing, vi) %>%
@@ -76,8 +77,6 @@ summary_vi <- long_data %>%
     .groups = "drop"   
   )
 summary_vi
-
-#drop: remove group, normalkeeps data frame
 
 p_time <- ggplot(summary_vi, aes(x = days_after_sowing, y = mean_value)) +
   geom_line(linewidth = 0.75,color = "black") +
