@@ -1,0 +1,93 @@
+#PCA explorative (all DAS)  variables: VI+ seed rate
+
+common_das: 
+
+#das 
+d <- 
+  
+pca_vars <- c("evi", "gndvi", "ndmi", "ndvi", "osavi", "ndre_b05", "ndre_b06", "seed_rate","yiel_dmean")
+
+pca_data <- train %>%
+    filter(days_after_sowing == d) %>%
+    select(all_of(pca_vars)) %>%
+    na.omit()
+  
+valid_vars <- names(pca_data)[sapply(pca_data, function(x) sd(x, na.rm = TRUE) > 0)]
+  pca_data <- pca_data %>% select(all_of(valid_vars))
+
+  
+pca_res <- PCA(pca_data, scale.unit = TRUE, graph = FALSE)
+
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "seed_rate"] <- "Seed rate"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "ndre_b06"] <- "NDRE B06"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "evi"] <- "EVI"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "ndmi"] <- "NDMI"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "osavi"] <- "OSAVI"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "ndre_b05"] <- "NDRE B05"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "ndvi"] <- "NDVI"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "gndvi"] <- "GNDVI"
+rownames(pca_res$var$coord)[rownames(pca_res$var$coord) == "yiel_dmean"] <- "Yield"
+
+theme(text = element_text(family = "Times New Roman"))
+
+p <- fviz_pca_biplot(
+  pca_res,
+  geom.ind = "point",
+  label = "var",
+  repel = TRUE
+) +
+  ggtitle(paste(d, "days after sowing")) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "Times New Roman"),
+    plot.title = element_text(
+      family = "Times New Roman",
+      size = 14,
+      face = "bold",
+      hjust = 0.5
+    ),
+    axis.title = element_text(
+      family = "Times New Roman",
+      size = 12
+    ),
+    axis.text = element_text(
+      family = "Times New Roman",
+      size = 10
+    )
+  )
+    
+# Cambiar la fuente de las etiquetas de las flechas
+
+for(i in seq_along(p$layers)) {
+  if("family" %in% names(p$layers[[i]]$aes_params) || 
+     inherits(p$layers[[i]]$geom, "GeomTextRepel") || 
+     inherits(p$layers[[i]]$geom, "GeomText")) {
+    p$layers[[i]]$aes_params$family <- "Times New Roman"
+  }
+}
+p    
+  
+  fviz_pca_var(
+      pca_res,
+      repel = TRUE
+    ) +
+      ggtitle(paste("PCA por DAS", d, "- VI + Seed_rate"))
+
+
+#PCA explorative (only VIs) 
+#date
+d <- 
+
+pca_db <- train %>%
+  filter(days_after_sowing == d) %>%
+  select(all_of(vi_vars)) %>%
+  na.omit()
+
+valid_vars <- names(pca_db)[sapply(pca_db, function(x) sd(x, na.rm = TRUE) > 0)]
+pca_db <- pca_db %>% select(all_of(valid_vars))
+
+pca_res1 <- PCA(pca_db, scale.unit = TRUE, graph = FALSE)
+
+fviz_pca_var(pca_res1, repel = TRUE)+
+    ggtitle("")
+    
