@@ -1,0 +1,109 @@
+#Function to adjust and evaluate a model (only LM)
+
+fit_and_evaluate <- function(formula_txt, train_df, test_df, das_label) {
+  
+  vars_needed <- all.vars(as.formula(formula_txt))
+  
+  tr <- train_df %>%
+    select(all_of(vars_needed)) %>%
+    na.omit()
+  
+  te <- test_df %>%
+    select(all_of(vars_needed)) %>%
+    na.omit()
+  
+  fit <- lm(as.formula(formula_txt), data = tr)
+  
+  pred_tr <- predict(fit, newdata = tr)
+  pred_te <- predict(fit, newdata = te)
+  
+  vif_vals <- tryCatch({
+    car::vif(fit)
+  }, error = function(e) {
+    NA
+  })
+  
+  vif_max <- if(is.numeric(vif_vals)) max(vif_vals, na.rm = TRUE) else NA_real_
+  
+  metrics <- data.frame(
+    DAS = das_label,
+    Model = formula_txt,
+    n_train = nrow(tr),
+    n_test = nrow(te),
+    R2_train = summary(fit)$r.squared,
+    Adj_R2_train = summary(fit)$adj.r.squared,
+    RMSE_train = safe_rmse(tr$yiel_dmean, pred_tr),
+    MAE_train = safe_mae(tr$yiel_dmean, pred_tr),
+    RMSE_test = safe_rmse(te$yiel_dmean, pred_te),
+    MAE_test = safe_mae(te$yiel_dmean, pred_te),
+    R2_test_pred = safe_r2_pred(te$yiel_dmean, pred_te),
+    AIC = AIC(fit),
+    BIC = BIC(fit),
+    VIF_max = vif_max
+  )
+  
+  list(
+    fit = fit,
+    metrics = metrics,
+    train_pred = cbind(tr, pred = pred_tr),
+    test_pred = cbind(te, pred = pred_te),
+    vif = vif_vals
+  )
+}
+
+
+
+#Function to adjust and evaluate a model (LM VS POLINOMIAL)
+
+fit_and_evaluate <- function(formula_txt, train_df, test_df, das_label,model_type) {
+
+  vars_needed <- all.vars(as.formula(formula_txt))
+  
+  tr <- train_df %>%
+  
+  select(all_of(vars_needed)) %>%
+    na.omit()
+    
+  te <- test_df %>%
+    select(all_of(vars_needed)) %>%
+    na.omit()
+    
+  fit <- lm(as.formula(formula_txt), data = tr)
+  
+  pred_tr <- predict(fit, newdata = tr)
+  pred_te <- predict(fit, newdata = te)
+  
+  vif_vals <- tryCatch({
+    car::vif(fit)
+  }, error = function(e) {
+    NA
+  })
+  
+  vif_max <- if(is.numeric(vif_vals)) max(vif_vals, na.rm = TRUE) else NA_real_
+  
+  metrics <- data.frame(
+    DAS = das_label,
+    Model_type = model_type,
+    Model = formula_txt,
+    n_train = nrow(tr),
+    n_test = nrow(te),
+    R2_train = summary(fit)$r.squared,
+    Adj_R2_train = summary(fit)$adj.r.squared,
+    RMSE_train = safe_rmse(tr$yiel_dmean, pred_tr),
+    MAE_train = safe_mae(tr$yiel_dmean, pred_tr),
+    RMSE_test = safe_rmse(te$yiel_dmean, pred_te),
+    MAE_test = safe_mae(te$yiel_dmean, pred_te),
+    R2_test_pred = safe_r2_pred(te$yiel_dmean, pred_te),
+    AIC = AIC(fit),
+    BIC = BIC(fit),
+    VIF_max = vif_max
+  )
+  
+  list(
+    fit = fit,
+    metrics = metrics,
+    train_pred = cbind(tr, pred = pred_tr),
+    test_pred = cbind(te, pred = pred_te),
+    vif = vif_vals
+  )
+}
