@@ -1,0 +1,79 @@
+#EQUATION 
+coef(best_result$fit)
+coefs <- coef(best_result$fit)
+coef(best_result$fit) |> as.data.frame()
+
+eq <- paste0(
+  "Yield = ",
+  round(coefs[1],3),
+  " + ",
+  round(coefs[2],3), "*OSAVI",
+  " + ",
+  round(coefs[3],3), "*OSAVI^2",
+  " + ",
+  round(coefs[4],3), "*EVI",
+  " + ",
+  round(coefs[5],3), "*EVI^2",
+  " + ",
+  round(coefs[6],3), "*Seed rate",
+  " + ",
+  round(coefs[7],3), "*Seed rate^2"
+)
+
+eq
+
+
+
+plot_df <- bind_rows(
+  best_result$train_pred %>% mutate(Set = "Training"),
+  best_result$test_pred %>% mutate(Set = "Validation")
+)
+
+metrics_plot <- plot_df %>%
+  group_by(Set) %>%
+  summarise(
+    x = min(yiel_dmean) + 0.5,
+    y = max(pred) - 0.1,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    label = c(
+      paste0(
+        "\nR² = ", round(best_model_row$R2_train, 3),
+        "\nRMSE = ", round(best_model_row$RMSE_train, 3),
+        "\nMAE = ", round(best_model_row$MAE_train, 3)
+      ),
+      paste0(
+        "\nR² = ", round(best_model_row$R2_test_pred, 3),
+        "\nRMSE = ", round(best_model_row$RMSE_test, 3),
+        "\nMAE = ", round(best_model_row$MAE_test, 3)
+      )
+    )
+  )
+
+ggplot(plot_df, aes(x = yiel_dmean, y = pred)) +
+  geom_point(size = 1) +
+  geom_abline(intercept = 0, slope = 1, linetype = 2) +
+  geom_label(
+    data = metrics_plot,
+    aes(x = x, y = y, label = label),
+    inherit.aes = FALSE,
+    size = 3,
+    fill = "white",
+    family = "Times New Roman"
+  ) +
+  facet_wrap(~Set, scales = "free") +
+  theme_bw() +
+  labs(
+    title = paste("Observed vs Predicted - DAS", best_das),
+    x = "Observed yield",
+    y = "Predicted yield"
+  ) +
+  theme(
+    panel.grid = element_blank(),   # remove grid
+    text = element_text(family = "Times New Roman"),
+    plot.title = element_text(size = 14),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10), color = "black",
+    strip.text = element_text(size = 12, face = "bold")
+  )
