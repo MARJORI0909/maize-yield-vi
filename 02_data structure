@@ -25,3 +25,12 @@ validation (test) plot -> 113
 
 train <- data %>% filter(plot == 116 )
 test  <- data %>% filter(plot == 113)
+
+#dates after sowing (DAS) in common for both plots (training and validation)
+  
+common_das <- intersect(
+  sort(unique(train$days_after_sowing)),
+  sort(unique(test$days_after_sowing))
+) %>% sort()
+
+print(common_das)
