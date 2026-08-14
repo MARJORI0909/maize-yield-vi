@@ -13,3 +13,18 @@ data <- data_raw %>%
 
 #see data structure
 str(data)
+
+#variables (VIs and seed rate)
+
+vi_vars <- c("evi","gndvi","ndmi","ndvi","osavi","ndre_b05","ndre_b06")
+predictors <- c(vi_vars,"Seed_rate")
+response_var <- "yield_mean"
+
+
+#training and validation data 
+example: 
+training plot -> 116
+validation (test) plot -> 113
+
+train <- data %>% filter(plot == 116 )
+test  <- data %>% filter(plot == 113)
