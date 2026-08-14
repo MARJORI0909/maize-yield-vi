@@ -183,5 +183,23 @@ ggplot(corr_half,
     ndre_b06 = "NDRE B06"
   ))
   
+#Ranking the best correlation VI vs yield for each DAS (Training data)
+
+cor_results_long <- cor_results %>%
+  pivot_longer(
+    cols = -days_after_sowing,
+    names_to = "vi",
+    values_to = "correlation"
+  )
   
+  cor_results_long <- cor_results_long %>%
+  filter(!vi %in% c("yield_mean", "seed_rate"))
+  
+  ranking_das <- cor_results_long %>%
+  group_by(days_after_sowing) %>%
+  slice_max(order_by = abs(correlation), n = 1) %>%
+  ungroup()
+  
+  ranking_das
+
   
