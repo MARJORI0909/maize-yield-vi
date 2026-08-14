@@ -35,9 +35,9 @@ ggplot(cor_long, aes(x = vi, y = factor(days_after_sowing), fill = correlation))
   ) +
   theme_minimal()+
   theme(
-    axis.text.x = element_text(color = "darkred", size =         9,face = "bold",family = "Times New Roman"),
-    axis.text.y = element_text(color = "black", size =           9, family = "Times New Roman"), 
-    axis.title.y = element_text(family = "Times New Roman",      color = "black", size = 13), 
+    axis.text.x = element_text(color = "darkred", size = 9,face = "bold",family = "Times New Roman"),
+    axis.text.y = element_text(color = "black", size = 9, family = "Times New Roman"), 
+    axis.title.y = element_text(family = "Times New Roman", color = "black", size = 13), 
     legend.title = element_text(
   family = "Times New Roman",
   color = "black",
@@ -52,7 +52,7 @@ windowsFonts(`Times New Roman` = windowsFont("TT Times New Roman"))
                    
 cor_results           
                    
-#Heatmap - Correlation yield, VI, seed rate for each DAS        
+#HEATMAP - Correlation yield, VI, seed rate for each DAS        
 
 corr_vars <- c(
   "yiel_dmean",
@@ -183,7 +183,7 @@ ggplot(corr_half,
     ndre_b06 = "NDRE B06"
   ))
   
-#Ranking the best correlation VI vs yield for each DAS (Training data)
+#RANKING the best correlation VI vs yield for each DAS (Training data)
 
 cor_results_long <- cor_results %>%
   pivot_longer(
