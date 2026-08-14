@@ -1,0 +1,30 @@
+#metrics (LM)
+
+all_metrics <- bind_rows(metrics_84,metrics_99, metrics_114, metrics_poly_84,metrics_poly_99,metrics_poly_114)
+
+all_metrics %>%
+  arrange(RMSE_test, desc(R2_test_pred))
+  
+all_metrics %>%
+  arrange(RMSE_test, desc(R2_test_pred), AIC)
+  
+  
+best_model_row <- all_metrics %>%
+  arrange(RMSE_test, MAE_test, desc(R2_test_pred)) %>%
+  slice(1)
+
+best_model_row
+
+best_formula <- best_model_row$Model
+best_das <- best_model_row$DAS
+
+best_result <- c(results_84,results_99, results_114,results_poly_84,results_poly_99,results_poly_114) %>%
+  keep(~ .x$metrics$Model == best_formula && .x$metrics$DAS == best_das) %>%
+  .[[1]]
+  
+  
+summary(best_result$fit)
+
+best_result$vif
+
+formula(best_result$fit)
