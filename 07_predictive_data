@@ -1,0 +1,17 @@
+#select the prediction dates based on PCA and Pearson correlation analyses.
+
+train_84 <- train %>% filter(days_after_sowing == 84)
+test_84  <- test  %>% filter(days_after_sowing == 84)
+
+train_99  <- train %>% filter(days_after_sowing == 99)
+test_99   <- test  %>% filter(days_after_sowing == 99)
+
+train_114 <- train %>% filter(days_after_sowing == 114)
+test_114  <- test  %>% filter(days_after_sowing == 114)
+
+dim(train_84)
+dim(test_84)
+dim(train_99)
+dim(test_99)
+dim(train_114)
+dim(test_114)
