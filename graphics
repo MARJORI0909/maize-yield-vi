@@ -1,23 +1,15 @@
 
-
-
-#6.1 Format
-# ---------------------------------
+#Format
 long_data <- train %>%
   pivot_longer(         #many columns in one column
     cols = all_of(vi_vars),
     names_to = "vi",
     values_to = "value"
   )
-  
-install.packages("ggplot2")
-library(ggplot2)
-  
 
-# 6.2 DAS BOXPLOT
-# ---------------------------------
-
-#only 116: TRAIN PLOT. Simple graphic
+# DAS boxplot
+# Training plot (116) 
+#Simple graphic
 p_box <- ggplot(long_data, aes(x = factor(days_after_sowing), y = value)) +
   geom_boxplot(alpha = 0.75, outlier.shape = 16, outlier.size = 1.5) +
   facet_wrap(~ vi, scales = "free_y", ncol = 2) +
@@ -61,7 +53,6 @@ ggplot(long_data, aes(x = factor(days_after_sowing), y = value)) +
   )
 
 #to separate in panels (different indices)
-
 data_subset <- long_data %>%
   filter(vi %in% c("ndvi", "gndvi", "evi"))
 
@@ -72,9 +63,8 @@ ggplot(data_subset, aes(x = factor(days_after_sowing), y = value)) +
   theme_classic()
 
 
-# 6.3 Average time curves (linear)
-# ---------------------------------
-#summarize the date in groups:mean, sd (standard deviation - measure dispersion), n (sample size), se (standard error - uncertainty the mean have)
+# Average time curves (linear)
+#summarize the date in groups:mean, sd (standard deviation), n (sample size), se (standard error)
 
 summary_vi <- long_data %>%
   group_by(plot, days_after_sowing, vi) %>%
@@ -85,8 +75,8 @@ summary_vi <- long_data %>%
     se_value = sd_value / sqrt(n),
     .groups = "drop"   
   )
-
 summary_vi
+
 #drop: remove group, normalkeeps data frame
 
 p_time <- ggplot(summary_vi, aes(x = days_after_sowing, y = mean_value)) +
