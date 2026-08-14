@@ -1,0 +1,246 @@
+#CANDIDATE LINEAL MODELS 
+#-----------------------
+
+#seedrate,OSAVI, EVI , NDVI
+
+##### 84 DAS
+models_84 <- list(
+  m84_1 = "yiel_dmean ~ osavi + ndvi + evi + seed_rate",
+  m84_2 = "yiel_dmean ~ osavi + ndvi + seed_rate",
+  m84_3 = "yiel_dmean ~ osavi + evi +  seed_rate",
+  m84_4 = "yiel_dmean ~ ndvi + evi + seed_rate",
+  m84_5 = "yiel_dmean ~ osavi + ndvi",
+  m84_6 = "yiel_dmean ~ osavi + ndvi + evi",
+  m84_7 = "yiel_dmean ~ ndvi + evi ",
+  m84_8 = "yiel_dmean ~ osavi + evi ",
+  m84_9 = "yiel_dmean ~ osavi + seed_rate ",
+  m84_10 = "yiel_dmean ~ ndvi + seed_rate ",
+  m84_11 = "yiel_dmean ~ evi + seed_rate "
+)
+
+class(train_84$yiel_dmean)
+class(test_84$yiel_dmean)
+
+train_84$yiel_dmean <- as.numeric(as.character(train_84$yiel_dmean))
+test_84$yiel_dmean  <- as.numeric(as.character(test_84$yiel_dmean))
+
+
+results_84 <- lapply(models_84, fit_and_evaluate,
+                     train_df = train_84,
+                     test_df = test_84,
+                     das_label = 84, model_type = "lm")
+
+metrics_84 <- bind_rows(lapply(results_84, function(x) x$metrics))
+metrics_84
+
+
+
+
+
+##### 99 DAS
+models_99 <- list(
+  m99_1 = "yiel_dmean ~ osavi + ndvi + evi + seed_rate",
+  m99_2 = "yiel_dmean ~ osavi + ndvi + seed_rate",
+  m99_3 = "yiel_dmean ~ osavi + evi +  seed_rate",
+  m99_4 = "yiel_dmean ~ ndvi + evi + seed_rate",
+  m99_5 = "yiel_dmean ~ osavi + ndvi",
+  m99_6 = "yiel_dmean ~ osavi + ndvi + evi",
+  m99_7 = "yiel_dmean ~ gndvi + evi ",
+  m99_8 = "yiel_dmean ~ osavi + evi ",
+  m99_9 = "yiel_dmean ~ osavi + seed_rate ",
+  m99_10 = "yiel_dmean ~ ndvi + seed_rate ",
+  m99_11 = "yiel_dmean ~ evi + seed_rate "
+)
+
+class(train_99$yiel_dmean)
+class(test_99$yiel_dmean)
+
+train_99$yiel_dmean <- as.numeric(as.character(train_99$yiel_dmean))
+test_99$yiel_dmean  <- as.numeric(as.character(test_99$yiel_dmean))
+
+
+results_99 <- lapply(models_99, fit_and_evaluate,
+                     train_df = train_99,
+                     test_df = test_99,
+                     das_label = 99, model_type = "lm")
+
+metrics_99 <- bind_rows(lapply(results_99, function(x) x$metrics))
+metrics_99
+
+###### 114 DAS
+models_114 <- list(
+  m114_1 = "yiel_dmean ~ evi + osavi + ndvi + seed_rate",
+  m114_2 = "yiel_dmean ~ evi + ndvi +  seed_rate",
+  m114_3 = "yiel_dmean ~ evi + osavi +  seed_rate",
+  m114_4 = "yiel_dmean ~ ndvi + osavi + seed_rate",
+  m114_5 = "yiel_dmean ~ evi + ndvi + osavi",
+  m114_6 = "yiel_dmean ~ evi + ndvi",
+  m114_7 = "yiel_dmean ~ evi + osavi",
+  m114_8 = "yiel_dmean ~ ndvi + osavi",
+  m114_9 = "yiel_dmean ~ evi + seed_rate",
+  m114_10 = "yiel_dmean ~ ndvi + seed_rate",
+  m114_11 = "yiel_dmean ~ osavi + seed_rate"
+)
+
+
+results_114 <- lapply(models_114, fit_and_evaluate,
+                      train_df = train_114,
+                      test_df = test_114,
+                      das_label = 114,model_type = "lm")
+
+metrics_114 <- bind_rows(lapply(results_114, function(x) x$metrics))
+metrics_114
+
+
+
+#---------------------------
+#CANDIDATE POLINOMIAL MODELS 
+#-------------------------
+
+## 84 DAS
+
+models_poly_84 <- list(
+  m99_ps1 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndvi +  evi + seed_rate",
+  m99_ps2 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndvi + seed_rate",
+  m99_ps3 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + evi +  seed_rate",
+  m99_ps4 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndvi ",
+  m99_ps5 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndvi + evi",
+  m99_ps6 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + seed_rate",
+  m99_ps7 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + evi"
+)
+
+#COMBINATIONS
+vars <- c("osavi", "ndvi", "evi", "seed_rate")
+
+get_terms <- function(var) {
+  c(
+    NA,
+    var,
+    paste0("poly(", var, ", 2, raw = TRUE)"),
+    paste0(var, " + poly(", var, ", 2, raw = TRUE)")
+  )
+}
+
+all_combinations <- expand.grid(lapply(vars, get_terms), stringsAsFactors = FALSE)
+
+formulas <- c()
+
+for (i in 1:nrow(all_combinations)) {
+  
+  terms <- unlist(all_combinations[i, ])
+  terms <- terms[!is.na(terms)]
+  
+  if (length(terms) > 0) {
+    
+    # variables base incluidas
+    included_vars <- vars[!is.na(unlist(all_combinations[i, ]))]
+    
+    # condición 1: mínimo 2 variables base
+    has_two_or_more_vars <- length(included_vars) >= 2
+    
+    # condición 2: al menos un polinomial
+    has_poly <- any(grepl("poly\\(", terms))
+    
+    if (has_two_or_more_vars && has_poly) {
+      formula <- paste("yiel_dmean ~", paste(terms, collapse = " + "))
+      formulas <- c(formulas, formula)
+    }
+  }
+}
+
+names(formulas) <- paste0("m", seq_along(formulas))
+
+length(formulas)
+formulas
+
+
+
+results_poly_84 <- lapply(
+  formulas,
+  fit_and_evaluate,
+  train_df = train_84,
+  test_df = test_84,
+  das_label = 84,
+  model_type = "Polynomial"
+)
+
+
+results_poly_99 <- lapply(
+  formulas,
+  fit_and_evaluate,
+  train_df = train_99,
+  test_df = test_99,
+  das_label = 99,
+  model_type = "Polynomial"
+)
+
+results_poly_114 <- lapply(
+  formulas,
+  fit_and_evaluate,
+  train_df = train_114,
+  test_df = test_114,
+  das_label = 114,
+  model_type = "Polynomial"
+)
+
+metrics_poly_84 <- bind_rows(lapply(results_poly_84, function(x) x$metrics))
+metrics_poly_84
+
+metrics_poly_99 <- bind_rows(lapply(results_poly_99, function(x) x$metrics))
+metrics_poly_99
+
+metrics_poly_114 <- bind_rows(lapply(results_poly_114, function(x) x$metrics))
+metrics_poly_114
+
+## 99 DAS
+
+models_poly_99 <- list(
+  m99_ps1 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + gndvi +  ndre_b06 + seed_rate",
+  m99_ps2 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + gndvi + seed_rate",
+  m99_ps3 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndre_b06 +  seed_rate",
+  m99_ps4 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + gndvi ",
+  m99_ps5 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + gndvi + ndre_b06",
+  m99_ps6 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + seed_rate",
+  m99_ps7 = "yiel_dmean ~ poly(osavi, 2, raw = TRUE) + ndre_b06"
+)
+
+results_poly_99 <- lapply(
+  models_poly_99,
+  fit_and_evaluate,
+  train_df = train_99,
+  test_df = test_99,
+  das_label = 99,
+  model_type = "Polynomial"
+)
+
+metrics_poly_99 <- bind_rows(lapply(results_poly_99, function(x) x$metrics))
+metrics_poly_99
+
+
+
+### 114 DAS 
+models_poly_114 <- list(
+  m114_ps1 = "yiel_dmean ~ poly(evi, degree = 2, raw = TRUE) + ndmi + ndre_b05 + seed_rate",
+  m114_ps2 = "yiel_dmean ~ poly(evi, degree = 2, raw = TRUE) + ndmi + seed_rate",
+  m114_ps3 = "yiel_dmean ~ poly(evi, degree = 2, raw = TRUE) + ndre_b05 + seed_rate",
+  m114_ps4 = "yiel_dmean ~ poly(evi, degree = 2, raw = TRUE) + ndmi + ndre_b05",
+  m114_ps5 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + evi + ndre_b05 + seed_rate",
+  m114_ps6 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + ndre_b05 + seed_rate",
+  m114_ps7 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + evi + ndre_b05",
+  m114_ps8 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + evi + seed_rate",
+  m114_ps9 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + poly(evi, degree = 2, raw = TRUE) + ndre_b05 + seed_rate",
+  m114_ps10 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + poly(evi, degree = 2, raw = TRUE) + seed_rate",
+  m114_ps11 = "yiel_dmean ~ poly(ndmi, degree = 2, raw = TRUE) + poly(evi, degree = 2, raw = TRUE) + ndre_b05"
+)
+
+results_poly_114 <- lapply(
+  models_poly_114,
+  fit_and_evaluate,
+  train_df = train_114,
+  test_df = test_114,
+  das_label = 114,
+  model_type = "Polynomial"
+)
+
+metrics_poly_114 <- bind_rows(lapply(results_poly_114, function(x) x$metrics))
+metrics_poly_114
