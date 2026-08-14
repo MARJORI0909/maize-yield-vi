@@ -1,0 +1,187 @@
+#CORRELATION YIELD vs VI
+  
+#EXPLORATIVE CORRELATION (DAYS AFTER SOWING VS VIs ~ yieldmean )
+cor_results <- train %>%
+  group_by(days_after_sowing) %>%
+  summarise(across(all_of(vi_vars),
+                   ~cor(.x, yiel_dmean, use="complete.obs")),
+                    .groups = "drop"
+  )
+
+cor_long <- cor_results %>%
+  pivot_longer(
+    cols = -days_after_sowing,
+    names_to = "vi",
+    values_to = "correlation"
+  )
+         
+ggplot(cor_long, aes(x = vi, y = factor(days_after_sowing), fill = correlation)) +
+  geom_tile() +
+  geom_text(aes(label = round(correlation, 2)), size = 3.5,family = "Times New Roman") +
+  scale_fill_gradient2(
+    low = "#B2182B",
+    mid = "white",
+    high = "#2166AC",
+    midpoint = 0,
+    limits = c(-1, 1)
+  ) + 
+  scale_x_discrete(labels = toupper) +
+  labs(x = NULL, y = "Days after sowing", fill = "r") +
+  guides(
+    fill = guide_colorbar(
+      barheight = unit(8, "cm"),
+      barwidth = unit(0.6, "cm")
+    )
+  ) +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(color = "darkred", size =         9,face = "bold",family = "Times New Roman"),
+    axis.text.y = element_text(color = "black", size =           9, family = "Times New Roman"), 
+    axis.title.y = element_text(family = "Times New Roman",      color = "black", size = 13), 
+    legend.title = element_text(
+  family = "Times New Roman",
+  color = "black",
+  size = 12),
+legend.text = element_text(
+  family = "Times New Roman",
+  color = "black",
+  size = 10
+))
+    
+windowsFonts(`Times New Roman` = windowsFont("TT Times New Roman"))
+                   
+cor_results           
+                   
+#Heatmap - Correlation yield, VI, seed rate for each DAS        
+
+corr_vars <- c(
+  "yiel_dmean",
+  "seed_rate",
+  "evi",
+  "gndvi",
+  "ndmi",
+  "ndvi",
+  "osavi",
+  "ndre_b05",
+  "ndre_b06"
+)
+
+get_corr_matrix_half_labels <- function(df, das_value, vars){
+   sub <- df %>%
+    filter(days_after_sowing == das_value) %>%
+    select(all_of(vars))
+ valid_vars <- names(sub)[sapply(sub, function(x){
+    sum(!is.na(x)) >= 3 & sd(x, na.rm=TRUE) > 0
+  })]
+
+  sub2 <- sub %>% select(all_of(valid_vars))
+
+  cor_mat <- cor(sub2,
+                 use = "pairwise.complete.obs",
+                 method = "pearson")
+
+  cor_df <- as.data.frame(as.table(cor_mat))
+  names(cor_df) <- c("Var1","Var2","Correlation")
+  
+  cor_df$Var1 <- factor(cor_df$Var1,
+                        levels = rownames(cor_mat))
+
+  cor_df$Var2 <- factor(cor_df$Var2,
+                        levels = colnames(cor_mat))
+
+  
+  cor_df <- cor_df %>%
+    mutate(
+      i = as.numeric(Var1),
+      j = as.numeric(Var2),
+      label = ifelse(i >= j, round(Correlation, 2), "")
+    )
+  
+  cor_df$DAS <- das_value
+
+  cor_df
+}
+         
+all_das <- sort(unique(train$days_after_sowing))
+
+corr_half <- purrr::map_df(all_das,
+                   ~get_corr_matrix_half_labels(train, .x, corr_vars))
+
+
+ggplot(corr_half,
+       aes(x = Var1,
+           y = Var2,
+           fill = Correlation)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = label),
+            size = 3,  family = "Times New Roman") +
+  scale_fill_gradient2(
+    low = "#B2182B",
+    mid = "white",
+    high = "#2166AC",
+    midpoint = 0,
+    limits = c(-1,1)
+  ) + guides(
+  fill = guide_colorbar(
+    barheight = unit(6, "cm"),
+    barwidth = unit(0.5, "cm")
+  )) +
+  facet_wrap(~DAS) +
+  theme_bw() +
+  labs(
+    title = "",
+    x = "",
+    y = "",
+    fill = "r"
+  ) +
+  theme(
+    strip.text = element_text(
+      family = "Times New Roman",
+      face = "bold",
+      size = 10,
+      color = "black"
+    ),
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1,
+      family = "Times New Roman"
+    ),
+    axis.text.y = element_text(
+      angle = 45,
+      hjust = 1,
+      family = "Times New Roman"
+    ), legend.text = element_text(
+  family = "Times New Roman",
+  color = "black",
+  size = 10
+), legend.title = element_text(
+  family = "Times New Roman",
+  color = "black",
+  size = 14
+)
+  ) +
+  scale_x_discrete(labels = c(
+    yiel_dmean = "Yield t/ha",
+    seed_rate = "Seed rate",
+    evi = "EVI",
+    gndvi = "GNDVI",
+    ndmi = "NDMI",
+    ndvi = "NDVI",
+    osavi = "OSAVI",
+    ndre_b05 = "NDRE B05",
+    ndre_b06 = "NDRE B06"
+  )) +
+  scale_y_discrete(labels = c(
+    yiel_dmean = "Yield t/ha",
+    seed_rate = "Seed rate",
+    evi = "EVI",
+    gndvi = "GNDVI",
+    ndmi = "NDMI",
+    ndvi = "NDVI",
+    osavi = "OSAVI",
+    ndre_b05 = "NDRE B05",
+    ndre_b06 = "NDRE B06"
+  ))
+  
+  
+  
