@@ -1,6 +1,4 @@
-###Residual diagnostics for the best results
-#------------------------------------------
-
+#Residual diagnostics for the best results
 #only with data training 
 
 par(mfrow = c(2,2),family = "Times New Roman",
@@ -12,10 +10,8 @@ plot(best_result$fit)
 
 
 #Normality
-
 shapiro.test(residuals(best_result$fit))
 
 # heteroscedasticity
 library(lmtest)
-
 bptest(best_result$fit)
