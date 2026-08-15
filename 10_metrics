@@ -1,4 +1,4 @@
-#metrics (LM)
+#metrics 
 
 all_metrics <- bind_rows(metrics_84,metrics_99, metrics_114, metrics_poly_84,metrics_poly_99,metrics_poly_114)
 
@@ -8,7 +8,7 @@ all_metrics %>%
 all_metrics %>%
   arrange(RMSE_test, desc(R2_test_pred), AIC)
   
-  
+ #best model 
 best_model_row <- all_metrics %>%
   arrange(RMSE_test, MAE_test, desc(R2_test_pred)) %>%
   slice(1)
