@@ -43,3 +43,8 @@ Validation data: plot 113
 
 12_residuals/
    Normality and heteroscedasticity evaluation for training data
+
+
+
+Data availability
+The raw experimental are not publicly available due to data-sharing restrictions. The repository contains the scripts required to process, analyse, and model the data.
