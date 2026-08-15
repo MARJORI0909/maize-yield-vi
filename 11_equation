@@ -1,4 +1,4 @@
-#EQUATION 
+#Predictive equation
 coef(best_result$fit)
 coefs <- coef(best_result$fit)
 coef(best_result$fit) |> as.data.frame()
@@ -22,8 +22,7 @@ eq <- paste0(
 
 eq
 
-
-
+#plot traning vs validation
 plot_df <- bind_rows(
   best_result$train_pred %>% mutate(Set = "Training"),
   best_result$test_pred %>% mutate(Set = "Validation")
