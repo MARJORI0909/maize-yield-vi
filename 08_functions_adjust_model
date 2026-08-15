@@ -1,4 +1,5 @@
-#Function to adjust and evaluate a model (only LM)
+#Function to adjust and evaluate a model 
+#Multiple Linear Regression
 
 fit_and_evaluate <- function(formula_txt, train_df, test_df, das_label) {
   
@@ -53,7 +54,8 @@ fit_and_evaluate <- function(formula_txt, train_df, test_df, das_label) {
 
 
 
-#Function to adjust and evaluate a model (LM VS POLINOMIAL)
+#Function to adjust and evaluate a model 
+#Multiple Linear Regression (using polinomial variables)
 
 fit_and_evaluate <- function(formula_txt, train_df, test_df, das_label,model_type) {
 
